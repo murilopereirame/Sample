@@ -40,7 +40,7 @@ export function parseReceiptText(rawText, localeConfig = {}) {
   const subtotal = extractAmountForKeywords(lines, keywords.subtotal);
   const tax = extractAmountForKeywords(lines, keywords.tax);
   const total =
-    extractAmountForKeywords(lines, keywords.total) ??
+    extractTotal(lines, keywords.total, keywords.subtotal) ??
     pickLargestAmount(lines);
 
   const discount_total = items.reduce((sum, item) => sum + (item.discount ?? 0), 0);
@@ -81,7 +81,7 @@ function splitSections(lines, keywords) {
   let seenPriceLine = false;
 
   for (const line of lines) {
-    if (PRICE_PATTERN.test(line)) {
+    if (hasPrice(line)) {
       seenPriceLine = true;
     }
 
@@ -141,6 +141,21 @@ function extractItems(lines, keywords) {
   return items;
 }
 
+function extractPaymentMethod(lines, paymentKeywords) {
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    const match = paymentKeywords.find((keyword) => lower.includes(keyword));
+    if (match) {
+      return match;
+    }
+  }
+  return null;
+}
+
+function hasPrice(line) {
+  return /(?:[\$€£¥₹]\s?\d{1,6}[.,]\d{2})|(?:\d{1,6}(?:[.,]\d{2})\s?[\$€£¥₹]?)|(?:\d+[.,]\d{2})/.test(line);
+}
+
 function classifyCategory(name) {
   const lower = name.toLowerCase();
   if (/milk|cheese|yogurt|butter/.test(lower)) return 'dairy';
@@ -197,6 +212,22 @@ function extractAmountForKeywords(lines, keywords) {
       continue;
     }
 
+    const prices = [...line.matchAll(PRICE_PATTERN)].map((m) => parseLocalizedNumber(m[0])).filter((v) => v !== null);
+    if (prices.length) {
+      return prices[prices.length - 1];
+    }
+  }
+  return null;
+}
+
+function extractTotal(lines, totalKeywords, subtotalKeywords) {
+  for (const line of lines) {
+    const lower = line.toLowerCase();
+    const hasTotal = totalKeywords.some((k) => lower.includes(k));
+    const hasSubtotal = subtotalKeywords.some((k) => lower.includes(k));
+    if (!hasTotal || hasSubtotal) {
+      continue;
+    }
     const prices = [...line.matchAll(PRICE_PATTERN)].map((m) => parseLocalizedNumber(m[0])).filter((v) => v !== null);
     if (prices.length) {
       return prices[prices.length - 1];
