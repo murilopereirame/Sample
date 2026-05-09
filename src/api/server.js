@@ -123,7 +123,7 @@ function createTempName(name = 'upload.bin') {
 function createTempPath(tempDir = './tmp', name = 'upload.bin') {
   const safeDir = path.resolve(tempDir);
   const candidate = path.join(safeDir, createTempName(name));
-  if (!candidate.startsWith(`${safeDir}${path.sep}`) && candidate !== safeDir) {
+  if (!candidate.startsWith(`${safeDir}${path.sep}`) || candidate === safeDir) {
     throw new Error('Invalid temporary file path');
   }
   return candidate;
