@@ -1,0 +1,12 @@
+{
+  "currency": "USD",
+  "ocr_lang": "eng",
+  "date_format": "MM/dd/yyyy",
+  "keywords": {
+    "total": ["total", "amount due"],
+    "tax": ["tax", "sales tax"],
+    "subtotal": ["subtotal"],
+    "discount": ["discount", "save"],
+    "payment": ["cash", "card", "visa", "mastercard", "contactless"]
+  }
+}

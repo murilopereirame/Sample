@@ -1,0 +1,12 @@
+{
+  "currency": "GBP",
+  "ocr_lang": "eng",
+  "date_format": "dd/MM/yyyy",
+  "keywords": {
+    "total": ["total", "amount due"],
+    "tax": ["vat"],
+    "subtotal": ["subtotal"],
+    "discount": ["discount", "save"],
+    "payment": ["cash", "card", "contactless"]
+  }
+}

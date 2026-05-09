@@ -1,0 +1,12 @@
+{
+  "currency": "EUR",
+  "ocr_lang": "deu",
+  "date_format": "dd.MM.yyyy",
+  "keywords": {
+    "total": ["gesamt", "summe", "betrag"],
+    "tax": ["mwst", "ust", "steuer"],
+    "subtotal": ["netto", "zwischensumme"],
+    "discount": ["rabatt", "ersparnis"],
+    "payment": ["karte", "bar", "kontaktlos"]
+  }
+}

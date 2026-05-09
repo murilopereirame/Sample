@@ -1,0 +1,12 @@
+services:
+  receipt-processor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: receipt-processor:offline
+    network_mode: none
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../receipts:/data/input
+      - ../output:/data/output
