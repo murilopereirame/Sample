@@ -44,8 +44,7 @@ export async function createServer(options = {}) {
       return reply.code(400).send({ error: 'file is required' });
     }
 
-    const randomName = createTempName(file.filename);
-    const tempPath = path.resolve(options.tempDir ?? './tmp', randomName);
+    const tempPath = createTempPath(options.tempDir, file.filename);
     await fs.mkdir(path.dirname(tempPath), { recursive: true });
     await fs.writeFile(tempPath, await file.toBuffer());
 
@@ -68,8 +67,7 @@ export async function createServer(options = {}) {
     const files = [];
     for await (const part of request.parts()) {
       if (part.type !== 'file') continue;
-      const randomName = createTempName(part.filename);
-      const tempPath = path.resolve(options.tempDir ?? './tmp', randomName);
+      const tempPath = createTempPath(options.tempDir, part.filename);
       await fs.mkdir(path.dirname(tempPath), { recursive: true });
       await fs.writeFile(tempPath, await part.toBuffer());
       files.push(tempPath);
@@ -116,9 +114,19 @@ export async function createServer(options = {}) {
 }
 
 function createTempName(name = 'upload.bin') {
-  const base = path.basename(name || 'upload.bin');
-  const ext = path.extname(base).replace(/[^a-zA-Z0-9.]/g, '') || '.bin';
-  return `${crypto.randomUUID()}${ext}`;
+  const base = path.basename(name);
+  const ext = path.extname(base).toLowerCase();
+  const safeExt = /^\.(jpg|jpeg|png|pdf)$/.test(ext) ? ext : '.bin';
+  return `${crypto.randomUUID()}${safeExt}`;
+}
+
+function createTempPath(tempDir = './tmp', name = 'upload.bin') {
+  const safeDir = path.resolve(tempDir);
+  const candidate = path.join(safeDir, createTempName(name));
+  if (!candidate.startsWith(`${safeDir}${path.sep}`) && candidate !== safeDir) {
+    throw new Error('Invalid temporary file path');
+  }
+  return candidate;
 }
 
 function checkLocalRateLimit(store, ip, scope, max, windowMs) {

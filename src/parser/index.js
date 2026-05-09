@@ -222,6 +222,7 @@ function extractDateTime(lines, preferredFormat) {
 
 function extractItems(lines, config) {
   const items = [];
+  const lowerProductHints = new Set(config.productHints.map((hint) => hint.toLowerCase()));
 
   for (const line of lines) {
     if (line.itemScore < 5 || line.isSummary || line.isMarketing || line.isFooter || line.isDateTimeLine) {
@@ -237,7 +238,7 @@ function extractItems(lines, config) {
     const quantity = Number(quantityMatch?.[1] ?? quantityMatch?.[2] ?? quantityMatch?.[3] ?? 1);
     const isDiscount = line.isDiscount || lastPrice.value < 0 || /^\s*-/.test(line.corrected);
     const totalPrice = roundMoney(isDiscount ? -Math.abs(lastPrice.value) : lastPrice.value);
-    const itemName = cleanupItemName(line.corrected, lastPrice.text, isDiscount, config.productHints);
+    const itemName = cleanupItemName(line.corrected, lastPrice.text, isDiscount, lowerProductHints, config.keywords.discount);
 
     if (!itemName) {
       continue;
@@ -257,7 +258,7 @@ function extractItems(lines, config) {
   return items;
 }
 
-function cleanupItemName(line, priceText, isDiscount, productHints) {
+function cleanupItemName(line, priceText, isDiscount, lowerProductHints, discountKeywords) {
   const lastIndex = line.lastIndexOf(priceText);
   const withoutPrice = lastIndex >= 0 ? line.slice(0, lastIndex) : line;
   const withoutQuantity = withoutPrice
@@ -267,7 +268,7 @@ function cleanupItemName(line, priceText, isDiscount, productHints) {
 
   const tokens = withoutQuantity.split(/\s+/).filter(Boolean);
   const cleanedTokens = tokens.filter((token, index) => {
-    if (/^[A-Z]{1,2}$/.test(token) && index === tokens.length - 1 && !productHints.some((hint) => hint.toLowerCase() === token.toLowerCase())) {
+    if (/^[A-Z]{1,2}$/.test(token) && index === tokens.length - 1 && !lowerProductHints.has(token.toLowerCase())) {
       return false;
     }
     return true;
@@ -278,8 +279,9 @@ function cleanupItemName(line, priceText, isDiscount, productHints) {
     return null;
   }
 
-  if (isDiscount && !/rabatt|discount|coupon|bonus|nachlass/i.test(name)) {
-    name = `${name} Rabatt`;
+  if (isDiscount && !containsAny(name.toLowerCase(), discountKeywords)) {
+    const fallbackKeyword = discountKeywords[0] ?? 'rabatt';
+    name = `${name} ${fallbackKeyword}`;
   }
 
   return name;

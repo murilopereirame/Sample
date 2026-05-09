@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { detectFileType } from '../utils/file.js';
 
 async function pdfToPlaceholderImage(pdfBuffer) {
+  // TODO: Replace this placeholder with actual pdfjs-dist page rendering for full PDF support.
   const text = `PDF input detected (${pdfBuffer.length} bytes).\nFor image-based PDFs, render page with pdfjs-dist + canvas adapter in production.`;
   const escapedText = text
     .replace(/&/g, '&amp;')

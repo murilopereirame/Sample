@@ -22,7 +22,7 @@ export function parseLocalizedNumber(input) {
     }
   } else if (hasComma && !hasDot) {
     const commaCount = (trimmed.match(/,/g) ?? []).length;
-    const [_integerPart, decimalPart] = trimmed.split(',');
+    const [, decimalPart] = trimmed.split(',');
     if (commaCount === 1 && decimalPart?.length === 2) {
       normalized = trimmed.replace(',', '.');
     } else {

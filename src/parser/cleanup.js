@@ -27,8 +27,8 @@ const CONFUSION_MAP = {
   '0': 'O',
   '1': 'I',
   '8': 'B',
-  X: 'K',
-  H: 'N'
+  'X': 'K',
+  'H': 'N'
 };
 
 export function normalizeOcrLines(rawLines, localeConfig = {}) {

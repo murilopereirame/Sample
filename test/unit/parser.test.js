@@ -29,6 +29,7 @@ describe('parseReceiptText', () => {
       'Kleiststr 12',
       'REWE Center',
       'SJAHMOBEL SM 300 9,95',
+      // Intentional OCR noise: SJAHMOBEL -> Ja!Mobil, daMobil -> Ja!Mobil, Rabati -> Rabatt.
       'daMobil 50 % Rabati -4,97',
       '18.04.2017 19:22 Batch 4225',
       'Ihre REWE PAYBACK Vorteile heute',
