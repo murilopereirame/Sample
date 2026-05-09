@@ -3,10 +3,10 @@ import { z } from 'zod';
 export const receiptItemSchema = z.object({
   name: z.string().default(''),
   quantity: z.number().min(0).default(1),
-  unit_price: z.number().min(0).default(0),
-  total_price: z.number().min(0).default(0),
+  unit_price: z.number().default(0),
+  total_price: z.number().default(0),
   category: z.string().default('other'),
-  discount: z.number().min(0).default(0)
+  discount: z.number().default(0)
 });
 
 export const receiptSchema = z.object({
