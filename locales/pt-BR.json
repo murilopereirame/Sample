@@ -7,6 +7,6 @@
     "tax": ["imposto", "tributo", "icms"],
     "subtotal": ["subtotal", "sub total"],
     "discount": ["desconto"],
-    "payment": ["cartao", "dinheiro", "aproximacao"]
+    "payment": ["cartão", "dinheiro", "aproximação"]
   }
 }

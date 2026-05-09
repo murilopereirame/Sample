@@ -28,6 +28,6 @@ parentPort?.on('message', async (msg) => {
 
   if (msg.type === 'shutdown') {
     await ocr.terminate();
-    process.exit(0);
+    parentPort?.close();
   }
 });

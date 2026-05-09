@@ -3,7 +3,8 @@ export function parseLocalizedNumber(input) {
     return Number.isFinite(input) ? Number(input) : null;
   }
 
-  const trimmed = input.replace(/[^\d,.-]/g, '').trim();
+  const cleaned = input.replace(/[^\d,.-]/g, '').trim();
+  const trimmed = cleaned.replace(/(?!^)-/g, '');
   if (!trimmed) {
     return null;
   }
@@ -20,7 +21,13 @@ export function parseLocalizedNumber(input) {
       normalized = trimmed.replace(/,/g, '');
     }
   } else if (hasComma && !hasDot) {
-    normalized = trimmed.replace(',', '.');
+    const commaCount = (trimmed.match(/,/g) ?? []).length;
+    const [_integerPart, decimalPart] = trimmed.split(',');
+    if (commaCount === 1 && decimalPart?.length === 2) {
+      normalized = trimmed.replace(',', '.');
+    } else {
+      normalized = trimmed.replace(/,/g, '');
+    }
   }
 
   const value = Number.parseFloat(normalized);

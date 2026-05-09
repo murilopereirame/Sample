@@ -4,7 +4,13 @@ import { detectFileType } from '../utils/file.js';
 
 async function pdfToPlaceholderImage(pdfBuffer) {
   const text = `PDF input detected (${pdfBuffer.length} bytes).\nFor image-based PDFs, render page with pdfjs-dist + canvas adapter in production.`;
-  const svg = `<svg width="2000" height="200"><rect width="100%" height="100%" fill="white"/><text x="20" y="60" font-size="28" fill="black">${text.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</text></svg>`;
+  const escapedText = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+  const svg = `<svg width="2000" height="200"><rect width="100%" height="100%" fill="white"/><text x="20" y="60" font-size="28" fill="black">${escapedText}</text></svg>`;
   return Buffer.from(svg);
 }
 

@@ -123,7 +123,7 @@ function extractItems(lines, keywords) {
     }
 
     const discount = keywords.discount.some((k) => line.toLowerCase().includes(k)) || /^-/.test(line)
-      ? roundMoney(Math.max(0, -1 * (parseLocalizedNumber(line) ?? 0)))
+      ? extractDiscount(line)
       : 0;
 
     const unit_price = quantity > 0 ? roundMoney(totalPrice / quantity) : roundMoney(totalPrice);
@@ -153,7 +153,7 @@ function extractPaymentMethod(lines, paymentKeywords) {
 }
 
 function hasPrice(line) {
-  return /(?:[\$€£¥₹]\s?\d{1,6}[.,]\d{2})|(?:\d{1,6}(?:[.,]\d{2})\s?[\$€£¥₹]?)|(?:\d+[.,]\d{2})/.test(line);
+  return new RegExp(PRICE_PATTERN.source).test(line);
 }
 
 function classifyCategory(name) {
@@ -165,7 +165,7 @@ function classifyCategory(name) {
   return 'other';
 }
 
-function extractDate(rawText, localeDateFormat = 'dd/MM/yyyy') {
+function extractDate(rawText, localePreferredFormat = 'dd/MM/yyyy') {
   for (const pattern of DATE_PATTERNS) {
     const match = pattern.exec(rawText);
     if (!match) {
@@ -173,7 +173,7 @@ function extractDate(rawText, localeDateFormat = 'dd/MM/yyyy') {
     }
 
     const candidate = match[0];
-    const formats = [localeDateFormat, 'dd/MM/yyyy', 'MM/dd/yyyy', 'dd.MM.yyyy', 'yyyy-MM-dd'];
+    const formats = [localePreferredFormat, 'dd/MM/yyyy', 'MM/dd/yyyy', 'dd.MM.yyyy', 'yyyy-MM-dd'];
     for (const format of formats) {
       const parsed = parse(candidate, format, new Date());
       if (!Number.isNaN(parsed.getTime())) {
@@ -234,6 +234,14 @@ function extractTotal(lines, totalKeywords, subtotalKeywords) {
     }
   }
   return null;
+}
+
+function extractDiscount(line) {
+  const prices = [...line.matchAll(PRICE_PATTERN)].map((match) => parseLocalizedNumber(match[0])).filter((value) => value !== null);
+  if (!prices.length) {
+    return 0;
+  }
+  return roundMoney(Math.abs(prices[prices.length - 1]));
 }
 
 function pickLargestAmount(lines) {

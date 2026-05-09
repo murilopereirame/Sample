@@ -7,6 +7,6 @@
     "tax": ["tva", "taxe"],
     "subtotal": ["sous-total"],
     "discount": ["remise"],
-    "payment": ["carte", "especes", "sans contact"]
+    "payment": ["carte", "espèces", "sans contact"]
   }
 }

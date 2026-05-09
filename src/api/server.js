@@ -10,6 +10,7 @@ import { BatchProcessor } from '../batch/queue.js';
 export async function createServer(options = {}) {
   const app = Fastify({ logger: false, bodyLimit: options.bodyLimit ?? 20 * 1024 * 1024 });
   const jobs = new Map();
+  const localLimiter = new Map();
 
   await app.register(multipart, {
     attachFieldsToBody: true,
@@ -20,16 +21,31 @@ export async function createServer(options = {}) {
     max: 100,
     timeWindow: '1 minute'
   });
+  const processRateLimit = app.rateLimit({
+    max: 30,
+    timeWindow: '1 minute'
+  });
+  const batchRateLimit = app.rateLimit({
+    max: 10,
+    timeWindow: '1 minute'
+  });
 
   app.get('/api/v1/health', async () => ({ status: 'ok', offline: true }));
 
-  app.post('/api/v1/process', async (request, reply) => {
+  app.post('/api/v1/process', {
+    preHandler: processRateLimit
+  }, async (request, reply) => {
+    if (!checkLocalRateLimit(localLimiter, request.ip, 'process', 30, 60_000)) {
+      return reply.code(429).send({ error: 'rate limit exceeded' });
+    }
+
     const file = await request.file();
     if (!file) {
       return reply.code(400).send({ error: 'file is required' });
     }
 
-    const tempPath = path.resolve(options.tempDir ?? './tmp', `${Date.now()}-${file.filename}`);
+    const randomName = createTempName(file.filename);
+    const tempPath = path.resolve(options.tempDir ?? './tmp', randomName);
     await fs.mkdir(path.dirname(tempPath), { recursive: true });
     await fs.writeFile(tempPath, await file.toBuffer());
 
@@ -42,11 +58,18 @@ export async function createServer(options = {}) {
     }
   });
 
-  app.post('/api/v1/batch', async (request, reply) => {
+  app.post('/api/v1/batch', {
+    preHandler: batchRateLimit
+  }, async (request, reply) => {
+    if (!checkLocalRateLimit(localLimiter, request.ip, 'batch', 10, 60_000)) {
+      return reply.code(429).send({ error: 'rate limit exceeded' });
+    }
+
     const files = [];
     for await (const part of request.parts()) {
       if (part.type !== 'file') continue;
-      const tempPath = path.resolve(options.tempDir ?? './tmp', `${Date.now()}-${part.filename}`);
+      const randomName = createTempName(part.filename);
+      const tempPath = path.resolve(options.tempDir ?? './tmp', randomName);
       await fs.mkdir(path.dirname(tempPath), { recursive: true });
       await fs.writeFile(tempPath, await part.toBuffer());
       files.push(tempPath);
@@ -90,6 +113,28 @@ export async function createServer(options = {}) {
   });
 
   return app;
+}
+
+function createTempName(name = 'upload.bin') {
+  const base = path.basename(name || 'upload.bin');
+  const ext = path.extname(base).replace(/[^a-zA-Z0-9.]/g, '') || '.bin';
+  return `${crypto.randomUUID()}${ext}`;
+}
+
+function checkLocalRateLimit(store, ip, scope, max, windowMs) {
+  const now = Date.now();
+  const key = `${ip}:${scope}`;
+  const entry = store.get(key);
+  if (!entry || now - entry.startedAt > windowMs) {
+    store.set(key, { startedAt: now, count: 1 });
+    return true;
+  }
+  if (entry.count >= max) {
+    return false;
+  }
+  entry.count += 1;
+  store.set(key, entry);
+  return true;
 }
 
 async function start() {

@@ -6,7 +6,11 @@ const args = process.argv.slice(2);
 const langsArg = args.find((arg) => arg.startsWith('--langs='));
 const includeOpenCv = args.includes('--opencv');
 
-const langs = langsArg ? langsArg.split('=')[1].split(',') : ['eng'];
+const langsValue = langsArg ? langsArg.split('=')[1] : 'eng';
+if (!langsValue || !langsValue.trim()) {
+  throw new Error('Invalid --langs argument. Example: --langs=eng,deu,fra');
+}
+const langs = langsValue.split(',').map((lang) => lang.trim()).filter(Boolean);
 
 const targetDir = path.resolve('./models/tessdata');
 await fs.mkdir(targetDir, { recursive: true });
