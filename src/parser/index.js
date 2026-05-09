@@ -191,7 +191,9 @@ function scoreMerchantLine(line, config) {
 
 function canonicalizeMerchantName(line, brands) {
   const normalizedLine = simplifyForComparison(line);
-  const matchedBrand = brands.find((brand) => normalizedLine.includes(simplifyForComparison(brand)));
+  const matchedBrand = [...brands]
+    .sort((left, right) => simplifyForComparison(right).length - simplifyForComparison(left).length)
+    .find((brand) => normalizedLine.includes(simplifyForComparison(brand)));
   if (matchedBrand) {
     return matchedBrand;
   }
@@ -302,7 +304,7 @@ function extractTotals(lines, items, config) {
     const matchingCandidate = totalCandidates.find((candidate) => Math.abs(candidate.amount - itemSum) <= 0.05);
     if (matchingCandidate) {
       total = matchingCandidate.amount;
-    } else if (total !== null && Math.abs(total - itemSum) > 0.5) {
+    } else if (total !== null && Math.abs(total - itemSum) > 0.5 && (totalCandidates[0]?.score ?? 0) < 8) {
       total = itemSum;
     }
   }
@@ -434,7 +436,10 @@ function looksLikeAddress(line, suffixes) {
   if (!/\d/.test(lower)) {
     return false;
   }
-  return suffixes.some((suffix) => new RegExp(`\\b${escapeRegExp(suffix)}\\b`, 'i').test(lower));
+  return suffixes.some((suffix) => {
+    const escaped = escapeRegExp(suffix);
+    return new RegExp(`\\b\\w*${escaped}\\.?\\b`, 'i').test(lower);
+  });
 }
 
 function containsDateTimeSignal(line) {
@@ -446,7 +451,7 @@ function calculateDiscountTotal(items) {
 }
 
 function containsAny(value, candidates) {
-  return candidates.some((candidate) => value.includes(candidate.toLowerCase()));
+  return (candidates ?? []).some((candidate) => matchesKeyword(value, candidate));
 }
 
 function classifyCategory(name) {
@@ -470,4 +475,15 @@ function detectCurrency(rawText) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function matchesKeyword(value, candidate) {
+  const normalizedCandidate = candidate.toLowerCase().trim();
+  if (!normalizedCandidate) {
+    return false;
+  }
+  if (normalizedCandidate.includes(' ')) {
+    return value.includes(normalizedCandidate);
+  }
+  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(normalizedCandidate)}([^a-z0-9]|$)`, 'i').test(value);
 }
