@@ -1,0 +1,12 @@
+{
+  "currency": "BRL",
+  "ocr_lang": "por",
+  "date_format": "dd/MM/yyyy",
+  "keywords": {
+    "total": ["total", "valor total"],
+    "tax": ["imposto", "tributo", "icms"],
+    "subtotal": ["subtotal", "sub total"],
+    "discount": ["desconto"],
+    "payment": ["cartão", "dinheiro", "aproximação"]
+  }
+}

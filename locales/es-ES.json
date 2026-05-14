@@ -1,0 +1,12 @@
+{
+  "currency": "EUR",
+  "ocr_lang": "spa",
+  "date_format": "dd/MM/yyyy",
+  "keywords": {
+    "total": ["total", "importe"],
+    "tax": ["iva", "impuesto"],
+    "subtotal": ["subtotal"],
+    "discount": ["descuento"],
+    "payment": ["tarjeta", "efectivo", "contactless"]
+  }
+}

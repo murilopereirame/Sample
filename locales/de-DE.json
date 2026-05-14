@@ -1,0 +1,23 @@
+{
+  "currency": "EUR",
+  "ocr_lang": "deu",
+  "date_format": "dd.MM.yyyy",
+  "brands": ["REWE", "REWE Center", "Lidl", "Aldi", "Edeka", "Netto", "Penny", "Kaufland"],
+  "address_suffixes": ["str", "straße", "strasse", "weg", "platz", "allee"],
+  "marketing_keywords": ["payback", "vorteile", "punktestand", "punkte", "coupon"],
+  "footer_keywords": ["batch", "filiale", "kasse"],
+  "product_dictionary": ["Ja!Mobil", "Rabatt", "PAYBACK", "Center", "SM"],
+  "corrections": {
+    "PAYBACX": "PAYBACK",
+    "SJAHMOBEL": "Ja!Mobil",
+    "DAMOBIL": "Ja!Mobil",
+    "RABATI": "Rabatt"
+  },
+  "keywords": {
+    "total": ["gesamt", "summe", "betrag", "zu zahlen"],
+    "tax": ["mwst", "ust", "steuer"],
+    "subtotal": ["netto", "zwischensumme"],
+    "discount": ["rabatt", "ersparnis", "coupon", "nachlass", "bonus"],
+    "payment": ["karte", "bar", "kontaktlos", "ec", "eur"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "currency": "EUR",
+  "ocr_lang": "fra",
+  "date_format": "dd/MM/yyyy",
+  "keywords": {
+    "total": ["total", "montant"],
+    "tax": ["tva", "taxe"],
+    "subtotal": ["sous-total"],
+    "discount": ["remise"],
+    "payment": ["carte", "espèces", "sans contact"]
+  }
+}
